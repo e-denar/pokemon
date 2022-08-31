@@ -6,7 +6,7 @@ import 'package:pokemon/data/models/sprite_model.dart';
 
 part 'pokemon_model.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 @HiveType(typeId: HiveTypeIds.pokemonTypeId)
 class PokemonModel extends DataObject {
   PokemonModel(
@@ -15,28 +15,35 @@ class PokemonModel extends DataObject {
     this.height,
     this.weight,
     this.baseExperience,
-    this.sprites,
-  ) : super(id: id.toString());
+    this.imageUrl,
+  ) : super(id: id);
 
-  factory PokemonModel.fromJson(Map<String, dynamic> json) =>
-      _$PokemonModelFromJson(json);
+  factory PokemonModel.fromJson(Map<String, dynamic> json) {
+    return _$PokemonModelFromJson(json);
+  }
 
   @HiveField(1)
-  final String name;
+  String name;
 
   @HiveField(2)
-  final int height;
+  int height;
 
   @HiveField(3)
-  final int weight;
+  int weight;
 
   @JsonKey(name: 'base_experience')
   @HiveField(4)
-  final int baseExperience;
+  int baseExperience;
 
-  @JsonKey(name: 'pokemon_v2_pokemonsprites')
+  @JsonKey(name: 'pokemon_v2_pokemonsprites', fromJson: _imageUrlDecoder)
   @HiveField(5)
-  final List<Sprite> sprites;
+  String imageUrl;
 
   Map<String, dynamic> toJson() => _$PokemonModelToJson(this);
+}
+
+String _imageUrlDecoder(List<dynamic> list) {
+  final Sprite result = Sprite.fromJson(list.first as Map<String, dynamic>);
+
+  return result.sprites.imageUrl;
 }

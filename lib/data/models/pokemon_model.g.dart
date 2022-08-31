@@ -22,7 +22,7 @@ class PokemonModelAdapter extends TypeAdapter<PokemonModel> {
       fields[2] as int,
       fields[3] as int,
       fields[4] as int,
-      (fields[5] as List).cast<Sprite>(),
+      fields[5] as String,
     );
   }
 
@@ -39,7 +39,7 @@ class PokemonModelAdapter extends TypeAdapter<PokemonModel> {
       ..writeByte(4)
       ..write(obj.baseExperience)
       ..writeByte(5)
-      ..write(obj.sprites)
+      ..write(obj.imageUrl)
       ..writeByte(0)
       ..write(obj.id);
   }
@@ -65,9 +65,7 @@ PokemonModel _$PokemonModelFromJson(Map<String, dynamic> json) => PokemonModel(
       json['height'] as int,
       json['weight'] as int,
       json['base_experience'] as int,
-      (json['pokemon_v2_pokemonsprites'] as List<dynamic>)
-          .map((e) => Sprite.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      _imageUrlDecoder(json['pokemon_v2_pokemonsprites'] as List),
     );
 
 Map<String, dynamic> _$PokemonModelToJson(PokemonModel instance) =>
@@ -77,6 +75,5 @@ Map<String, dynamic> _$PokemonModelToJson(PokemonModel instance) =>
       'height': instance.height,
       'weight': instance.weight,
       'base_experience': instance.baseExperience,
-      'pokemon_v2_pokemonsprites':
-          instance.sprites.map((e) => e.toJson()).toList(),
+      'pokemon_v2_pokemonsprites': instance.imageUrl,
     };
