@@ -21,15 +21,22 @@ class FeedViewModel extends ViewModel {
   Future<void> init() async {
     try {
       startLoading();
-      final List<PokemonModel> result = await _graphQLService.fetchPokemons();
-
-      _cache.addAll(<String, PokemonModel>{
-        for (final PokemonModel e in result) e.id: e,
-      });
-
+      await fetch();
       stopLoading();
     } catch (e) {
       startError();
     }
+  }
+
+  Future<void> fetch() async {
+    final List<PokemonModel> result = await _graphQLService.fetchPokemons(
+      offset: _cache.length,
+    );
+
+    _cache.addAll(<String, PokemonModel>{
+      for (final PokemonModel e in result) e.id: e,
+    });
+
+    notifyListeners();
   }
 }

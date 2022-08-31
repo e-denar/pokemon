@@ -12,13 +12,13 @@ class GraphQLService {
   final Dio? _dio;
 
   /// Get list of [PokemonModel]
-  Future<List<PokemonModel>> fetchPokemons() async {
+  Future<List<PokemonModel>> fetchPokemons({int offset = 0}) async {
     try {
       final PokemonListResponse? result =
           await _dio?.graphQLRequest<PokemonListResponse>(
         document: '''
-        {
-          pokemon_v2_pokemon(limit: 5, offset: 10) {
+        query pokemonList(${r'$limit'}: Int!, ${r'$offset'}: Int!) {
+          pokemon_v2_pokemon(limit: ${r'$limit'}, offset: ${r'$offset'}) {
             pokemon_species_id
             order
             name
@@ -33,6 +33,10 @@ class GraphQLService {
           }
         }
         ''',
+        variables: <String, dynamic>{
+          'limit': ENV_.load,
+          'offset': offset,
+        },
         decoder: (Map<String, dynamic> json) =>
             PokemonListResponse.fromJson(json),
       );

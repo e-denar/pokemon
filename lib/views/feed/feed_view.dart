@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokemon/data/models/pokemon_model.dart';
+import 'package:pokemon/routes/routes.dart';
 import 'package:pokemon/viewmodels/feed_view_model.dart';
 import 'package:pokemon/viewmodels/view_model.dart';
 import 'package:provider/provider.dart';
@@ -54,30 +55,54 @@ class _PokemonListView extends StatelessWidget {
           );
         }
 
-        return ListView.builder(
-          itemBuilder: (_, int i) {
-            final PokemonModel item = items.elementAt(i);
-            final String title = item.name;
-            final String imageUrl = item.sprites.first.sprites.imageUrl;
-            final String height = item.height.toString();
-            final String width = item.weight.toString();
-            final String baseXp = item.baseExperience.toString();
+        return NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollState) {
+            final double maxScrollExtent = scrollState.metrics.maxScrollExtent;
 
-            return ListTile(
-              onTap: () => _onItemTap(context, item),
-              leading: Image.network(imageUrl),
-              title: Text(title),
-              subtitle: Text('height: $height width: $width'),
-              trailing: Text(baseXp),
-            );
+            if (scrollState.metrics.pixels >= maxScrollExtent) {
+              context.read<FeedViewModel>().fetch();
+            }
+            return false;
           },
-          itemCount: items.length,
+          child: ListView.builder(
+            itemBuilder: (_, int i) {
+              if (i == items.length) {
+                return const SizedBox(
+                  height: 40,
+                  width: 40,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              final PokemonModel item = items.elementAt(i);
+              final String title = item.name;
+              final String imageUrl = item.sprites.first.sprites.imageUrl;
+              final String height = item.height.toString();
+              final String width = item.weight.toString();
+              final String baseXp = item.baseExperience.toString();
+
+              return ListTile(
+                onTap: () => _onItemTap(context, item),
+                leading: Image.network(
+                  imageUrl,
+                  height: 40,
+                  width: 40,
+                ),
+                title: Text(title),
+                subtitle: Text('height: $height width: $width'),
+                trailing: Text(baseXp),
+              );
+            },
+            itemCount: items.length + 1,
+          ),
         );
       },
     );
   }
 
   void _onItemTap(BuildContext context, PokemonModel pokemon) {
-    // TODO: navigate to details page
+    Navigator.of(context).pushNamed(Routes.details, arguments: pokemon);
   }
 }

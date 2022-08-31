@@ -44,8 +44,8 @@ const Map<Environment, String> _baseUrls = <Environment, String>{
 };
 
 const Map<Environment, int> _paginationLoad = <Environment, int>{
-  Environment.debug: 5,
-  Environment.profile: 5,
+  Environment.debug: 20,
+  Environment.profile: 20,
   // TODO: Add load for prod
-  Environment.release: 5,
+  Environment.release: 20,
 };
