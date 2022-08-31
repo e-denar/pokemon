@@ -37,10 +37,16 @@ mixin HiveServiceMixin<D extends StatefulWidget, T extends DataObject>
 
     return ValueListenableBuilder<Box<T>>(
       valueListenable: listenable!,
-      builder: (BuildContext context, Box<T> listenable, _) => viewBuilder(
-        context,
-        listenable.get(id)!,
-      ),
+      builder: (BuildContext context, Box<T> listenable, _) {
+        if (!listenable.containsKey(id)) {
+          return const SizedBox();
+        }
+
+        return viewBuilder(
+          context,
+          listenable.get(id)!,
+        );
+      },
     );
   }
 }
