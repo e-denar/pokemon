@@ -3,6 +3,7 @@ import 'package:pokemon/data/models/pokemon_model.dart';
 import 'package:pokemon/routes/routes.dart';
 import 'package:pokemon/viewmodels/feed_view_model.dart';
 import 'package:pokemon/viewmodels/view_model.dart';
+import 'package:pokemon/views/mixins/hive_mixin.dart';
 import 'package:provider/provider.dart';
 
 class FeedView extends StatelessWidget {
@@ -76,23 +77,9 @@ class _PokemonListView extends StatelessWidget {
                 );
               }
 
-              final PokemonModel item = items.elementAt(i);
-              final String title = item.name;
-              final String imageUrl = item.sprites.first.sprites.imageUrl;
-              final String height = item.height.toString();
-              final String width = item.weight.toString();
-              final String baseXp = item.baseExperience.toString();
-
-              return ListTile(
-                onTap: () => _onItemTap(context, item),
-                leading: Image.network(
-                  imageUrl,
-                  height: 40,
-                  width: 40,
-                ),
-                title: Text(title),
-                subtitle: Text('height: $height width: $width'),
-                trailing: Text(baseXp),
+              return _PokemonFeedItem(
+                pokemon: items[i],
+                onItemTap: () => _onItemTap(context, items[i]),
               );
             },
             itemCount: items.length + 1,
@@ -104,5 +91,46 @@ class _PokemonListView extends StatelessWidget {
 
   void _onItemTap(BuildContext context, PokemonModel pokemon) {
     Navigator.of(context).pushNamed(Routes.details, arguments: pokemon);
+  }
+}
+
+class _PokemonFeedItem extends StatefulWidget {
+  const _PokemonFeedItem({
+    Key? key,
+    required this.pokemon,
+    this.onItemTap,
+  }) : super(key: key);
+
+  final PokemonModel pokemon;
+  final VoidCallback? onItemTap;
+
+  @override
+  __PokemonFeedItemState createState() => __PokemonFeedItemState();
+}
+
+class __PokemonFeedItemState extends State<_PokemonFeedItem>
+    with HiveServiceMixin<_PokemonFeedItem, PokemonModel> {
+  @override
+  int get id => widget.pokemon.id;
+
+  @override
+  Widget viewBuilder(BuildContext context, PokemonModel item) {
+    final String title = item.name;
+    final String imageUrl = item.imageUrl;
+    final String height = item.height.toString();
+    final String width = item.weight.toString();
+    final String baseXp = item.baseExperience.toString();
+
+    return ListTile(
+      onTap: widget.onItemTap,
+      leading: Image.network(
+        imageUrl,
+        height: 40,
+        width: 40,
+      ),
+      title: Text(title),
+      subtitle: Text('height: $height width: $width'),
+      trailing: Text(baseXp),
+    );
   }
 }
