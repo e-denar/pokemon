@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokemon/data/repositories/graphql_service.dart';
+import 'package:pokemon/data/repositories/pokemon_hive_repository.dart';
 import 'package:pokemon/managers/hive_manager.dart';
 import 'package:pokemon/routes/pages.dart';
 import 'package:pokemon/routes/routes.dart';
@@ -29,9 +30,15 @@ class PokemonApp extends StatelessWidget {
     return <SingleChildWidget>[
       Provider<HiveManager>(
         create: (_) => HiveManager(),
+        lazy: false,
       ),
       Provider<GraphQLService>(
         create: (_) => GraphQLService(),
+      ),
+      Provider<PokemonHiveRepository>(
+        create: (BuildContext context) => PokemonHiveRepository(
+          graphQLService: context.read<GraphQLService>(),
+        ),
       )
     ];
   }

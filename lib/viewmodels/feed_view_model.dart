@@ -1,20 +1,20 @@
 import 'dart:collection';
 
 import 'package:pokemon/data/models/pokemon_model.dart';
-import 'package:pokemon/data/repositories/graphql_service.dart';
+import 'package:pokemon/data/repositories/pokemon_hive_repository.dart';
 import 'package:pokemon/viewmodels/view_model.dart';
 
 class FeedViewModel extends ViewModel {
   FeedViewModel(
-    this._graphQLService,
+    this._repository,
   ) {
     init();
   }
 
-  final GraphQLService _graphQLService;
+  final PokemonHiveRepository _repository;
 
-  final LinkedHashMap<String, PokemonModel> _cache =
-      LinkedHashMap<String, PokemonModel>();
+  final LinkedHashMap<int, PokemonModel> _cache =
+      LinkedHashMap<int, PokemonModel>();
 
   List<PokemonModel> get items => _cache.values.toList();
 
@@ -29,11 +29,11 @@ class FeedViewModel extends ViewModel {
   }
 
   Future<void> fetch() async {
-    final List<PokemonModel> result = await _graphQLService.fetchPokemons(
+    final List<PokemonModel> result = await _repository.fetchPokemons(
       offset: _cache.length,
     );
 
-    _cache.addAll(<String, PokemonModel>{
+    _cache.addAll(<int, PokemonModel>{
       for (final PokemonModel e in result) e.id: e,
     });
 
