@@ -3,4 +3,5 @@ abstract class Routes {
 
   static const String splash = '/splash';
   static const String feed = '/feed';
+  static const String details = '/details';
 }
