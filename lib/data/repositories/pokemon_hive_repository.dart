@@ -22,10 +22,17 @@ class PokemonHiveRepository extends HiveRepository<PokemonModel> {
     }
   }
 
+  /// Simple search through cache
   Future<List<PokemonModel>> search(String text) async {
     final List<PokemonModel> result =
         await where((PokemonModel r) => r.name.contains(text));
 
     return result;
+  }
+
+  @override
+  Future<void> delete(dynamic key) async {
+    // TODO: call api for delete pokemon
+    super.delete(key);
   }
 }
