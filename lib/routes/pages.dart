@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokemon/data/models/models.barrel.dart';
-import 'package:pokemon/data/repositories/graphql_service.dart';
+import 'package:pokemon/data/repositories/hive_repository.dart';
 import 'package:pokemon/data/repositories/pokemon_hive_repository.dart';
 import 'package:pokemon/routes/routes.dart';
 import 'package:pokemon/viewmodels/detail_view_model.dart';
@@ -22,7 +22,8 @@ class Pages {
     Routes.feed: (BuildContext context) =>
         ChangeNotifierProvider<FeedViewModel>(
           create: (_) => FeedViewModel(
-            context.read<PokemonHiveRepository>(),
+            context.read<HiveRepository<PokemonModel>>()
+                as PokemonHiveRepository,
           ),
           child: const FeedView(),
         ),
@@ -39,7 +40,7 @@ class Pages {
       return ChangeNotifierProvider<DetailViewModel>(
         create: (_) => DetailViewModel(
           pokemon!,
-          context.read<GraphQLService>(),
+          context.read<HiveRepository<PokemonModel>>() as PokemonHiveRepository,
         ),
         child: const DetailView(),
       );
