@@ -3,7 +3,8 @@ import 'package:pokemon/data/models/pokemon_model.dart';
 import 'package:pokemon/routes/routes.dart';
 import 'package:pokemon/viewmodels/feed_view_model.dart';
 import 'package:pokemon/viewmodels/view_model.dart';
-import 'package:pokemon/views/mixins/hive_mixin.dart';
+import 'package:pokemon/views/widgets/cached_view.dart';
+import 'package:pokemon/views/widgets/search_dialog_box.dart';
 import 'package:provider/provider.dart';
 
 class FeedView extends StatelessWidget {
@@ -16,6 +17,17 @@ class FeedView extends StatelessWidget {
         title: const Text(
           'Feed',
         ),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              showSearchDialogBox(context, (String value) async {
+                final FeedViewModel viewModel = context.read<FeedViewModel>();
+                await viewModel.search(value);
+              });
+            },
+            icon: const Icon(Icons.search),
+          )
+        ],
       ),
       body: Selector<FeedViewModel, ViewModelState>(
         selector: (_, FeedViewModel viewModel) => viewModel.state,
@@ -48,6 +60,7 @@ class _PokemonListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Selector<FeedViewModel, List<PokemonModel>>(
+      shouldRebuild: (_, __) => true,
       selector: (_, FeedViewModel viewModel) => viewModel.items,
       builder: (_, List<PokemonModel> items, __) {
         if (items.isEmpty) {
@@ -66,24 +79,32 @@ class _PokemonListView extends StatelessWidget {
             return false;
           },
           child: ListView.builder(
-            itemBuilder: (_, int i) {
-              if (i == items.length) {
-                return const SizedBox(
-                  height: 40,
-                  width: 40,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int i) {
+                return CachedView<PokemonModel>(
+                  id: items[i].id,
+                  builder: (BuildContext context, PokemonModel item) {
+                    final String title = item.name;
+                    final String imageUrl = item.imageUrl;
+                    final String height = item.height.toString();
+                    final String width = item.weight.toString();
+                    final String baseXp = item.baseExperience.toString();
 
-              return _PokemonFeedItem(
-                pokemon: items[i],
-                onItemTap: () => _onItemTap(context, items[i]),
-              );
-            },
-            itemCount: items.length + 1,
-          ),
+                    return ListTile(
+                      onTap: () => _onItemTap(context, items[i]),
+                      leading: Image.network(
+                        imageUrl,
+                        height: 40,
+                        width: 40,
+                        errorBuilder: (_, __, ___) => const Text('Image Error'),
+                      ),
+                      title: Text(title),
+                      subtitle: Text('height: $height weight: $width'),
+                      trailing: Text(baseXp),
+                    );
+                  },
+                );
+              }),
         );
       },
     );
@@ -91,46 +112,5 @@ class _PokemonListView extends StatelessWidget {
 
   void _onItemTap(BuildContext context, PokemonModel pokemon) {
     Navigator.of(context).pushNamed(Routes.details, arguments: pokemon);
-  }
-}
-
-class _PokemonFeedItem extends StatefulWidget {
-  const _PokemonFeedItem({
-    Key? key,
-    required this.pokemon,
-    this.onItemTap,
-  }) : super(key: key);
-
-  final PokemonModel pokemon;
-  final VoidCallback? onItemTap;
-
-  @override
-  __PokemonFeedItemState createState() => __PokemonFeedItemState();
-}
-
-class __PokemonFeedItemState extends State<_PokemonFeedItem>
-    with HiveServiceMixin<_PokemonFeedItem, PokemonModel> {
-  @override
-  int get id => widget.pokemon.id;
-
-  @override
-  Widget viewBuilder(BuildContext context, PokemonModel item) {
-    final String title = item.name;
-    final String imageUrl = item.imageUrl;
-    final String height = item.height.toString();
-    final String width = item.weight.toString();
-    final String baseXp = item.baseExperience.toString();
-
-    return ListTile(
-      onTap: widget.onItemTap,
-      leading: Image.network(
-        imageUrl,
-        height: 40,
-        width: 40,
-      ),
-      title: Text(title),
-      subtitle: Text('height: $height width: $width'),
-      trailing: Text(baseXp),
-    );
   }
 }

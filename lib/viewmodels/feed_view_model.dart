@@ -12,11 +12,12 @@ class FeedViewModel extends ViewModel {
   }
 
   final PokemonHiveRepository _repository;
-
   final LinkedHashMap<int, PokemonModel> _cache =
       LinkedHashMap<int, PokemonModel>();
+  bool _isFetching = false;
 
-  List<PokemonModel> get items => _cache.values.toList();
+  UnmodifiableListView<PokemonModel> get items =>
+      UnmodifiableListView<PokemonModel>(_cache.values.toList());
 
   Future<void> init() async {
     try {
@@ -29,6 +30,11 @@ class FeedViewModel extends ViewModel {
   }
 
   Future<void> fetch() async {
+    if (_isFetching) {
+      return;
+    }
+
+    _isFetching = true;
     final List<PokemonModel> result = await _repository.fetchPokemons(
       offset: _cache.length,
     );
@@ -37,6 +43,19 @@ class FeedViewModel extends ViewModel {
       for (final PokemonModel e in result) e.id: e,
     });
 
+    _isFetching = false;
     notifyListeners();
+  }
+
+  Future<void> search(String text) async {
+    startLoading();
+
+    _cache.clear();
+    final List<PokemonModel> result = await _repository.search(text);
+    _cache.addAll(<int, PokemonModel>{
+      for (final PokemonModel e in result) e.id: e,
+    });
+
+    stopLoading();
   }
 }
