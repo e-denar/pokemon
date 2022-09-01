@@ -9,9 +9,9 @@ abstract class HiveRepository<T extends DataObject> {
     return box.get(key);
   }
 
-  Future<ValueListenable<Box<T>>> getListenable({List<String>? keys}) async {
+  Future<ValueListenable<Box<T>>> getListenable({dynamic key}) async {
     final Box<T> box = await _getBox();
-    return box.listenable(keys: keys);
+    return box.listenable(keys: <dynamic>[key]);
   }
 
   Future<List<T>> getAll() async {
@@ -50,7 +50,7 @@ abstract class HiveRepository<T extends DataObject> {
     await row.save();
   }
 
-  Future<void> delete(Object key) async {
+  Future<void> delete(dynamic key) async {
     final Box<T> box = await _getBox();
     await box.delete(key);
   }
